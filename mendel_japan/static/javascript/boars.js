@@ -37,7 +37,7 @@ jQuery(function ($) {
         // DataTable
         var table = $('#datatable').DataTable({
             // リロード時の検索条件保存
-            stateSave: true,
+            stateSave: false,
 
             // 水平スクロール
             scrollX: true,
