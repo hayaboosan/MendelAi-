@@ -42,6 +42,11 @@ jQuery(function ($) {
             // 水平スクロール
             scrollX: true,
 
+            // 垂直スクロール
+            scrollY: '50vh',
+            scrollCollapse: true,
+            paging: false,
+
             initComplete: function () {
                 // フッターの列検索
                 this.api()
