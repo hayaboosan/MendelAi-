@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% import "bootstrap/wtf.html" as wtf %} {% block
+title %}雄リストダウンロード{% endblock %} {% block content %}
+<div class="card mx-auto mt-5" style="width: 30rem">
+    <div class="card-body">
+        <h4 class="card-title mt-4 text-center">雄リストダウンロード</h4>
+        <form method="post">
+            <table class="table caption-top">
+                {{ form.hidden_tag() }}
+                <caption>
+                    {{ form.enrollment_status.label }}
+                </caption>
+                <tbody>
+                    <tr>
+                        {% for status in form.enrollment_status %}
+                        <td>{{ status }} {{ status.label }}</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="table caption-top">
+                {{ form.hidden_tag() }}
+                <caption>
+                    系統
+                </caption>
+                <tbody>
+                    <tr>
+                        <td>{{ form.m_line }} {{ form.m_line.label }}</td>
+                        <td>{{ form.n_line }} {{ form.n_line.label }}</td>
+                        <td>{{ form.l_line }} {{ form.l_line.label }}</td>
+                        <td>{{ form.z_line }} {{ form.z_line.label }}</td>
+                        <td>{{ form.jl_line }} {{ form.jl_line.label }}</td>
+                        <td>{{ form.jw_line }} {{ form.jw_line.label }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="float-end mt-4">
+                {{wtf.form_field(form.submit, value='ダウンロード',
+                button_map={'submit': 'primary'}) }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

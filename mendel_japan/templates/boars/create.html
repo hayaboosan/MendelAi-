@@ -1,0 +1,20 @@
+{% extends "base.html" %} {% import "bootstrap/wtf.html" as wtf %} {% block
+title %}雄情報登録{% endblock %} {% block content %}
+<div class="card mx-auto mt-5" style="width: 30rem">
+    <div class="card-body">
+        <h4 class="card-title mt-4 text-center">雄情報登録</h4>
+        <form class="form" method="post">
+            {{ form.hidden_tag()}}
+            <div class="mt-4">{{ wtf.form_field(form.tattoo) }}</div>
+            <div class="mt-4">{{ wtf.form_field(form.name) }}</div>
+            <div class="mt-4">{{ wtf.form_field(form.line) }}</div>
+            <div class="mt-4">{{ wtf.form_field(form.birth_on) }}</div>
+            <div class="mt-4">{{ wtf.form_field(form.culling_on) }}</div>
+            <div class="float-end mt-4">
+                {{wtf.form_field(form.submit, value='登録',
+                button_map={'submit': 'primary'}) }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

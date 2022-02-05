@@ -1,0 +1,86 @@
+{% extends "base.html" %} {% import "bootstrap/wtf.html" as wtf %} {% block
+title %}雄一覧{% endblock %} {% block content %}
+<h1 align="center">雄一覧</h1>
+<div class="mb-3">
+<a
+    class="btn btn-secondary"
+    href="/boars/create"
+    role="button"
+    aria-expanded="false"
+    aria-controls="multiCollapseExample1"
+    >新規登録</a
+>
+<a
+    class="btn btn-secondary"
+    href="/boars/upload"
+    role="button"
+    aria-expanded="false"
+    aria-controls="multiCollapseExample1"
+    >一括登録</a
+>
+<a
+    class="btn btn-secondary"
+    href="/boars/download"
+    role="button"
+    aria-expanded="false"
+    aria-controls="multiCollapseExample1"
+    >ダウンロード</a
+>
+</div>
+<table id="datatable" class="display" style="width: 100%">
+        <thead>
+            <tr>
+                <th>タトゥー</th>
+                <th>雄ID</th>
+                <th>系統</th>
+                <th>生年月日</th>
+                <th>淘汰日</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for boar in boars %}
+            <tr id="boar-id-{{boar.id}}">
+                <td>{{boar.tattoo}}</td>
+                <td>{{boar.name}}</td>
+                <td>{{boar.line}}</td>
+                <td>{{boar.birth_on}}</td>
+                <td>{{boar.culling_on}}</td>
+                <td>
+                    <a
+                        class="btn btn-secondary"
+                        href="/boars/{{boar.id}}/edit"
+                        role="button"
+                        aria-expanded="false"
+                        aria-controls="multiCollapseExample1"
+                        >編集</a
+                    >
+                </td>
+                <td>
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onClick="deleteBoar({{boar.id}})"
+                    >
+                        削除
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>タトゥー</th>
+                <th>雄ID</th>
+                <th>系統</th>
+                <th>生年月日</th>
+                <th>淘汰日</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>
+    {% endblock %}
+</table>
