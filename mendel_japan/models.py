@@ -11,7 +11,7 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(50), nullable=False)
 
 
-class Boar(db.Model, UserMixin):
+class Boar(db.Model):
     __tablename__ = 'boars'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -20,3 +20,11 @@ class Boar(db.Model, UserMixin):
     birth_on = db.Column(db.Date)
     line = db.Column(db.String(50), nullable=False)
     culling_on = db.Column(db.Date)
+    farm_id = db.Column(db.Integer, db.ForeignKey('farms.id'))
+
+
+class Farm(db.Model):
+    __tablename__ = 'farms'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
