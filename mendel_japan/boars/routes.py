@@ -45,7 +45,7 @@ class BoarForm(FlaskForm):
         validators.Optional(strip_whitespace=True)])
     culling_on = DateField('淘汰日', validators=[
         validators.Optional(strip_whitespace=True)])
-    farm = SelectField('農場', coerce=int)
+    farm_id = SelectField('農場', coerce=int)
     submit = SubmitField()
 
     def __init__(self, *args, **kwargs):
@@ -55,20 +55,18 @@ class BoarForm(FlaskForm):
     def _set_farms(self: BoarForm) -> None:
         """
         Farmモデルのデータを選択肢として表示させる
-        デフォルト値の設定ができなかったため、
-        現状は初期値がGGPセンターになってしまう
 
         Args:
             self (BoarForm): 入力フォーム
         """
         farms: Farm = Farm.query.order_by(asc(Farm.id)).all()
-        self.farm.choices = [(farm.id, farm.name) for farm in farms]
+        self.farm_id.choices = [(farm.id, farm.name) for farm in farms]
 
 
 class BoarUpload(FlaskForm):
     file = FileField('', validators=[
         validators.InputRequired('必須です')])
-    farm = SelectField('農場', coerce=int)
+    farm_id = SelectField('農場', coerce=int)
     submit = SubmitField()
 
     def __init__(self, *args, **kwargs):
@@ -83,7 +81,7 @@ class BoarUpload(FlaskForm):
             self (BoarForm): 入力フォーム
         """
         farms: Farm = Farm.query.order_by(asc(Farm.id)).all()
-        self.farm.choices = [(farm.id, farm.name) for farm in farms]
+        self.farm_id.choices = [(farm.id, farm.name) for farm in farms]
 
 
 class BoarDownload(FlaskForm):
@@ -196,7 +194,7 @@ def commit_boar(form: BoarForm, id: int = None) -> None:
     boar.line = form.line.data
     boar.birth_on = form.birth_on.data
     boar.culling_on = form.culling_on.data
-    boar.farm_id = form.farm.data
+    boar.farm_id = form.farm_id.data
     if id is None:
         db.session.add(boar)
     db.session.commit()
@@ -217,7 +215,7 @@ def upload() -> str:
     if form.validate_on_submit():
         file: request = request.files['file']
         if file and allowed_file(file.filename):
-            save_and_import(file, form.farm.data)
+            save_and_import(file, form.farm_id.data)
             return redirect(url_for('boars.index'))
         else:
             flash(

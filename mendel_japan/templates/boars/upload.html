@@ -6,7 +6,7 @@ title %}ファイルアップロード{% endblock %} {% block content %}
         <form class="form" method="post" enctype="multipart/form-data">
             {{ form.hidden_tag()}}
             <div class="mt-4">{{ wtf.form_field(form.file) }}</div>
-            <div class="mt-4">{{ wtf.form_field(form.farm) }}</div>
+            <div class="mt-4">{{ wtf.form_field(form.farm_id) }}</div>
             <div class="float-end mt-4">
                 {{wtf.form_field(form.submit, value='アップロード',
                 button_map={'submit': 'primary'}) }}
