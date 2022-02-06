@@ -5,23 +5,20 @@ from flask import (
 from flask import current_app as app
 from flask_assets import Bundle, Environment
 from flask_login import login_required, current_user
-from flask_wtf import FlaskForm
 import flask_sqlalchemy
 
 
 import os
 from typing import TypeVar
-from wtforms import (
-    StringField, DateField, validators, SubmitField, FileField, RadioField,
-    BooleanField, SelectField)
 from werkzeug.utils import secure_filename
 import json
-from sqlalchemy import and_, asc
+from sqlalchemy import and_
 
 
 from mendel_japan import db, ALLOWED_EXTENSIONS, UPLOAD_FOLDER
 from mendel_japan.models import Boar, Farm
-from mendel_japan.boars import exporter, importer
+from mendel_japan.boars import exporter, forms, importer
+
 
 boars = Blueprint('boars', __name__,)
 js = Bundle('javascript/boars.js', output='javascript/main.js')
@@ -29,75 +26,6 @@ assets = Environment(app)
 assets.register('main_js', js)
 
 FileObject = TypeVar('FileObject')
-
-
-class BoarForm(FlaskForm):
-    tattoo = StringField('タトゥー', validators=[
-        validators.InputRequired('必須です'),
-        validators.Length(max=10, message='10文字以内で入力してください')])
-    name = StringField('雄ID', validators=[
-        validators.InputRequired('必須です'),
-        validators.Length(max=10, message='10文字以内で入力してください')])
-    line = StringField('系統', validators=[
-        validators.InputRequired('必須です'),
-        validators.Length(max=10, message='10文字以内で入力してください')])
-    birth_on = DateField('生年月日', validators=[
-        validators.Optional(strip_whitespace=True)])
-    culling_on = DateField('淘汰日', validators=[
-        validators.Optional(strip_whitespace=True)])
-    farm_id = SelectField('農場', coerce=int)
-    submit = SubmitField()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._set_farms()
-
-    def _set_farms(self: BoarForm) -> None:
-        """
-        Farmモデルのデータを選択肢として表示させる
-
-        Args:
-            self (BoarForm): 入力フォーム
-        """
-        farms: Farm = Farm.query.order_by(asc(Farm.id)).all()
-        self.farm_id.choices = [(farm.id, farm.name) for farm in farms]
-
-
-class BoarUpload(FlaskForm):
-    file = FileField('', validators=[
-        validators.InputRequired('必須です')])
-    farm_id = SelectField('農場', coerce=int)
-    submit = SubmitField()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._set_farms()
-
-    def _set_farms(self: BoarForm) -> None:
-        """
-        Farmモデルのデータを選択肢として表示させる
-
-        Args:
-            self (BoarForm): 入力フォーム
-        """
-        farms: Farm = Farm.query.order_by(asc(Farm.id)).all()
-        self.farm_id.choices = [(farm.id, farm.name) for farm in farms]
-
-
-class BoarDownload(FlaskForm):
-    enrollment_status = \
-        RadioField('在籍状況', choices=[
-            ('all', '全て'),
-            ('alive_only', '在籍中のみ'),
-            ('culled_only', '淘汰済みのみ'),
-        ], validators=[validators.InputRequired()])
-    m_line = BooleanField('D')
-    n_line = BooleanField('TL')
-    l_line = BooleanField('LL')
-    z_line = BooleanField('TW')
-    jl_line = BooleanField('L')
-    jw_line = BooleanField('W')
-    submit = SubmitField()
 
 
 @boars.route('/', methods=['GET', 'POST'])
@@ -135,7 +63,7 @@ def create() -> str:
     Returns:
         str: html
     """
-    form: BoarForm = BoarForm()
+    form: forms.BoarForm = forms.BoarForm()
     if form.validate_on_submit():
         if Boar.query.filter_by(tattoo=form.tattoo.data).first():
             flash('そのタトゥーは登録済みです', category='error')
@@ -161,7 +89,7 @@ def edit(id: int) -> str:
         str: html
     """
     boar: Boar = Boar.query.get(id)
-    form: BoarForm = BoarForm(obj=boar)
+    form: forms.BoarForm = forms.BoarForm(obj=boar)
     if form.validate_on_submit():
         registered_boar: Boar = Boar.query.filter_by(
             tattoo=form.tattoo.data).first()
@@ -178,7 +106,7 @@ def edit(id: int) -> str:
             './boars/edit.html', user=current_user, form=form)
 
 
-def commit_boar(form: BoarForm, id: int = None) -> None:
+def commit_boar(form: forms.BoarForm, id: int = None) -> None:
     """
     boarsテーブルにコミットする
     既にidがある場合は更新
@@ -211,7 +139,7 @@ def upload() -> str:
     Returns:
         str: html
     """
-    form: BoarUpload = BoarUpload()
+    form: forms.BoarUpload = forms.BoarUpload()
     if form.validate_on_submit():
         file: request = request.files['file']
         if file and allowed_file(file.filename):
@@ -284,16 +212,18 @@ def download() -> str | wrappers.Response:
     Returns:
         str: HTML | flask.wrappers.Response: レスポンス(Excelファイル)
     """
-    form: BoarDownload = BoarDownload()
+    form: forms.BoarDownload = forms.BoarDownload()
     if form.validate_on_submit():
-        boar_ids: list = check_enrollment_status(form)
-        boars_query: list = check_line(boar_ids, form)
+        boar_ids: list = download_check_enrollment_status(form)
+        boar_ids: list = download_check_line(boar_ids, form)
+        boars_query: flask_sqlalchemy.BaseQuery = \
+            download_check_farm(boar_ids, form)
         return exporter.downloadExcel(boars_query)
     return render_template(
         './boars/download.html', user=current_user, form=form)
 
 
-def check_enrollment_status(form: BoarDownload) -> list:
+def download_check_enrollment_status(form: forms.BoarDownload) -> list:
     """
     選択した在籍状況の雄id(インデックス番号)をリストで返す
 
@@ -314,8 +244,7 @@ def check_enrollment_status(form: BoarDownload) -> list:
     return [x.id for x in boar_list]
 
 
-def check_line(
-        boar_ids: list, form: BoarDownload) -> flask_sqlalchemy.BaseQuery:
+def download_check_line(boar_ids: list, form: forms.BoarDownload) -> list:
     """
     選択した在籍状況と系統の雄を返す
 
@@ -335,8 +264,22 @@ def check_line(
         lines.append('LLLL')
     if form.z_line.data:
         lines.append('ZZZZ')
-    return Boar.query.filter(and_(
+    boar_list = Boar.query.filter(and_(
         Boar.id.in_(boar_ids), Boar.line.in_(lines),))
+    return [x.id for x in boar_list]
 
 
-# TODO: 状態モデルの作成と雄モデルの接続
+def download_check_farm(
+    boar_ids: list, form: forms.BoarDownload
+) -> flask_sqlalchemy.BaseQuery:
+    farms: list = []
+    if form.ggp1.data:
+        farms.append(41)
+    if form.ggp2.data:
+        farms.append(42)
+    if form.east.data:
+        farms.append(61)
+    return Boar.query.filter(and_(
+        Boar.id.in_(boar_ids), Boar.farm_id.in_(farms),))
+
+    # TODO: 状態モデルの作成と雄モデルの接続

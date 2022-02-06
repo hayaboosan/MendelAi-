@@ -19,7 +19,6 @@ title %}雄リストダウンロード{% endblock %} {% block content %}
             </table>
 
             <table class="table caption-top">
-                {{ form.hidden_tag() }}
                 <caption>
                     系統
                 </caption>
@@ -31,6 +30,19 @@ title %}雄リストダウンロード{% endblock %} {% block content %}
                         <td>{{ form.z_line }} {{ form.z_line.label }}</td>
                         <td>{{ form.jl_line }} {{ form.jl_line.label }}</td>
                         <td>{{ form.jw_line }} {{ form.jw_line.label }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="table caption-top">
+                <caption>
+                    農場
+                </caption>
+                <tbody>
+                    <tr>
+                        <td>{{ form.ggp1 }} {{ form.ggp1.label }}</td>
+                        <td>{{ form.ggp2 }} {{ form.ggp2.label }}</td>
+                        <td>{{ form.east }} {{ form.east.label }}</td>
                     </tr>
                 </tbody>
             </table>

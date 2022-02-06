@@ -11,14 +11,17 @@ from datetime import datetime
 import sqlalchemy
 
 
-from config import   DATABASE_URI
+from config import DATABASE_URI
+from mendel_japan.models import Farm
 
 
 def downloadExcel(
         boars_query: flask_sqlalchemy.BaseQuery) -> flask.wrappers.Response:
     """
     選択した条件の雄(boars_query)をデータフレームに変換
-    カラム名を日本語にしてExcelファイルに入力
+    カラム名を日本語に変換
+    農場名を日本語に変換
+    Excelファイルに入力
     Excelファイルをレスポンスとして返す
 
     Args:
@@ -30,9 +33,25 @@ def downloadExcel(
     engine: sqlalchemy.engine = \
         sqlalchemy.create_engine(DATABASE_URI, echo=True)
     boars: pd.DataFrame = pd.read_sql(boars_query.statement, con=engine)
-    boars_rename: pd.DataFrame = boars.rename(columns=rename_column())
+    boars_rename: pd.DataFrame = data_rename(boars)
     file_name: str = add_workbook(boars_rename)
     return add_response(file_name)
+
+
+def data_rename(boars: pd.DataFrame) -> pd.DataFrame:
+    """雄一覧のカラム名と農場名を日本語に変換して返す
+
+    Args:
+        boars (pd.DataFrame): 未加工の雄一覧
+
+    Returns:
+        pd.DataFrame: 変換後の雄一覧
+    """
+    boars_columns_rename: pd.DataFrame = boars.rename(columns=rename_column())
+    boars_add_farm_name: pd.DataFrame = boars_columns_rename.copy()
+    boars_add_farm_name['農場'] = \
+        boars_columns_rename.農場.map(lambda x: Farm.query.get(x).name)
+    return boars_add_farm_name
 
 
 def rename_column() -> dict:
@@ -49,6 +68,7 @@ def rename_column() -> dict:
         'line': '系統',
         'birth_on': '生年月日',
         'culling_on': '淘汰日',
+        'farm_id': '農場',
     }
 
 
