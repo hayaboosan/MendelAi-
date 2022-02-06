@@ -1,3 +1,9 @@
+"""雄モデル関連の入力フォームクラス
+
+    ・雄情報登録及び編集用
+    ・一括登録用ファイルアップロード用
+    ・Excelファイルダウンロード用
+    """
 from mendel_japan.models import Farm
 from flask_wtf import FlaskForm
 from wtforms import (

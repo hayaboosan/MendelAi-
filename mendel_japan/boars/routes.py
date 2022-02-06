@@ -43,15 +43,6 @@ def index() -> str:
         './boars/index.html', user=current_user, boars=boars, farms=Farm.query)
 
 
-def search_date(date, start_or_end):
-    if date:
-        return date
-    elif start_or_end == 'start':
-        return '0001-01-01'
-    else:
-        return '3000-01-01'
-
-
 @ boars.route('/create', methods=['GET', 'POST'])
 # @login_required
 def create() -> str:
@@ -272,6 +263,15 @@ def download_check_line(boar_ids: list, form: forms.BoarDownload) -> list:
 def download_check_farm(
     boar_ids: list, form: forms.BoarDownload
 ) -> flask_sqlalchemy.BaseQuery:
+    """選択した農場の雄を返す
+
+    Args:
+        boar_ids (list): 雄id(インデックス番号)
+        form (BoarDownload): フォーム入力内容
+
+    Returns:
+        flask_sqlalchemy.BaseQuery: 雄一覧
+    """
     farms: list = []
     if form.ggp1.data:
         farms.append(41)
