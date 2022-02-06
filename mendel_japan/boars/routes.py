@@ -68,7 +68,22 @@ class BoarForm(FlaskForm):
 class BoarUpload(FlaskForm):
     file = FileField('', validators=[
         validators.InputRequired('必須です')])
+    farm = SelectField('農場', coerce=int)
     submit = SubmitField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._set_farms()
+
+    def _set_farms(self: BoarForm) -> None:
+        """
+        Farmモデルのデータを選択肢として表示させる
+
+        Args:
+            self (BoarForm): 入力フォーム
+        """
+        farms: Farm = Farm.query.order_by(asc(Farm.id)).all()
+        self.farm.choices = [(farm.id, farm.name) for farm in farms]
 
 
 class BoarDownload(FlaskForm):
@@ -202,7 +217,7 @@ def upload() -> str:
     if form.validate_on_submit():
         file: request = request.files['file']
         if file and allowed_file(file.filename):
-            save_and_import(file)
+            save_and_import(file, form.farm.data)
             return redirect(url_for('boars.index'))
         else:
             flash(
@@ -225,7 +240,7 @@ def allowed_file(filename: str) -> bool:
     return '.' in filename and extension in ALLOWED_EXTENSIONS
 
 
-def save_and_import(file: FileObject) -> None:
+def save_and_import(file: FileObject, farm_id: int) -> None:
     """
     アップロードしたファイルをtmpディレクトリに一時保管
     ファイル内容をDBに登録する
@@ -236,7 +251,7 @@ def save_and_import(file: FileObject) -> None:
     filename: str = secure_filename(file.filename)
     file_path: str = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
-    importer.import_boar_list(file_path, filename)
+    importer.import_boar_list(file_path, filename, farm_id)
 
 
 @ boars.route('/delete-boar', methods=['POST'])
@@ -327,4 +342,3 @@ def check_line(
 
 
 # TODO: 状態モデルの作成と雄モデルの接続
-# TODO: 農場モデルの作成と雄モデルの接続

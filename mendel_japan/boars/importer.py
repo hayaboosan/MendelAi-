@@ -5,7 +5,7 @@ from flask import flash
 import re
 
 
-def import_boar_list(file_path: str, filename: str) -> None:
+def import_boar_list(file_path: str, filename: str, farm_id: int) -> None:
     """
     アップロードしたExcelファイルのフォーマットをチェック
     データフレームに取り込みDB保存済みの雄との差を抽出(未登録の雄を抽出)
@@ -20,8 +20,10 @@ def import_boar_list(file_path: str, filename: str) -> None:
     boar_to_register: pd.DataFrame = df[
         ~(df.tattoo.isin(already_registered().tattoo))]
     if len(boar_to_register) > 1:
-        rename_boar = rename_to_boar(boar_to_register)
-        append_database(rename_boar)
+        boar_rename = rename_to_boar(boar_to_register)
+        boar_add_farm = boar_rename.copy()
+        boar_add_farm['farm_id'] = farm_id
+        append_database(boar_add_farm)
     else:
         flash(f'{filename}に未登録の雄はいませんでした。', 'error')
 
