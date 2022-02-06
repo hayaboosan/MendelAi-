@@ -13,16 +13,15 @@ import os
 from typing import TypeVar
 from wtforms import (
     StringField, DateField, validators, SubmitField, FileField, RadioField,
-    BooleanField)
+    BooleanField, SelectField)
 from werkzeug.utils import secure_filename
 import json
-from sqlalchemy import and_
+from sqlalchemy import and_, asc
 
 
 from mendel_japan import db, ALLOWED_EXTENSIONS, UPLOAD_FOLDER
-from mendel_japan.models import Boar
+from mendel_japan.models import Boar, Farm
 from mendel_japan.boars import exporter, importer
-
 
 boars = Blueprint('boars', __name__,)
 js = Bundle('javascript/boars.js', output='javascript/main.js')
@@ -46,7 +45,24 @@ class BoarForm(FlaskForm):
         validators.Optional(strip_whitespace=True)])
     culling_on = DateField('淘汰日', validators=[
         validators.Optional(strip_whitespace=True)])
+    farm = SelectField('農場', coerce=int)
     submit = SubmitField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._set_farms()
+
+    def _set_farms(self: BoarForm) -> None:
+        """
+        Farmモデルのデータを選択肢として表示させる
+        デフォルト値の設定ができなかったため、
+        現状は初期値がGGPセンターになってしまう
+
+        Args:
+            self (BoarForm): 入力フォーム
+        """
+        farms: Farm = Farm.query.order_by(asc(Farm.id)).all()
+        self.farm.choices = [(farm.id, farm.name) for farm in farms]
 
 
 class BoarUpload(FlaskForm):
@@ -61,7 +77,7 @@ class BoarDownload(FlaskForm):
             ('all', '全て'),
             ('alive_only', '在籍中のみ'),
             ('culled_only', '淘汰済みのみ'),
-        ], default='2', validators=[validators.InputRequired()])
+        ], validators=[validators.InputRequired()])
     m_line = BooleanField('D')
     n_line = BooleanField('TL')
     l_line = BooleanField('LL')
@@ -83,7 +99,7 @@ def index() -> str:
     """
     boars: Boar = Boar.query.all()
     return render_template(
-        './boars/index.html', user=current_user, boars=boars)
+        './boars/index.html', user=current_user, boars=boars, farms=Farm.query)
 
 
 def search_date(date, start_or_end):
@@ -165,6 +181,7 @@ def commit_boar(form: BoarForm, id: int = None) -> None:
     boar.line = form.line.data
     boar.birth_on = form.birth_on.data
     boar.culling_on = form.culling_on.data
+    boar.farm_id = form.farm.data
     if id is None:
         db.session.add(boar)
     db.session.commit()

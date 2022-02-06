@@ -30,10 +30,10 @@ title %}雄一覧{% endblock %} {% block content %}
 <table id="datatable" class="display" style="width: 100%">
         <thead>
             <tr>
+                <th>農場</th>
                 <th>雄ID</th>
                 <th>系統</th>
                 <th>淘汰日</th>
-                <th></th>
                 <th></th>
             </tr>
         </thead>
@@ -41,6 +41,7 @@ title %}雄一覧{% endblock %} {% block content %}
         <tbody>
             {% for boar in boars %}
             <tr id="boar-id-{{boar.id}}">
+                <td>{{farms.get(boar.farm_id).name}}</td>
                 <td>{{boar.name}}</td>
                 <td>{{boar.line}}</td>
                 <td>{{boar.culling_on}}</td>
@@ -53,8 +54,6 @@ title %}雄一覧{% endblock %} {% block content %}
                         aria-controls="multiCollapseExample1"
                         >編集</a
                     >
-                </td>
-                <td>
                     <button
                         type="button"
                         class="btn btn-secondary"
@@ -68,10 +67,10 @@ title %}雄一覧{% endblock %} {% block content %}
         </tbody>
         <tfoot>
             <tr>
+                <th>農場</th>
                 <th>雄ID</th>
                 <th>系統</th>
                 <th>淘汰日</th>
-                <th></th>
                 <th></th>
             </tr>
         </tfoot>

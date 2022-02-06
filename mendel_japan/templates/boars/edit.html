@@ -10,6 +10,7 @@ title %}雄情報編集{% endblock %} {% block content %}
             <div class="mt-4">{{ wtf.form_field(form.line) }}</div>
             <div class="mt-4">{{ wtf.form_field(form.birth_on) }}</div>
             <div class="mt-4">{{ wtf.form_field(form.culling_on) }}</div>
+            <div class="mt-4">{{ wtf.form_field(form.farm) }}</div>
             <div class="float-end mt-4">
                 {{wtf.form_field(form.submit, value='更新',
                 button_map={'submit': 'primary'}) }}
