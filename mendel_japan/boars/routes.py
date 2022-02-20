@@ -283,3 +283,5 @@ def download_check_farm(
         Boar.id.in_(boar_ids), Boar.farm_id.in_(farms),))
 
     # TODO: 状態モデルの作成と雄モデルの接続
+    # TODO: AIセンターモデルの作成とデフォルト表示
+    # TODO: AIセンターモデルと編集権限

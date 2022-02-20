@@ -9,6 +9,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(150))
     name = db.Column(db.String(50), nullable=False)
+    ai_station_id = db.Column(db.Integer, db.ForeignKey('ai_stations.id'))
 
 
 class Boar(db.Model):
@@ -25,6 +26,14 @@ class Boar(db.Model):
 
 class Farm(db.Model):
     __tablename__ = 'farms'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    ai_station_id = db.Column(db.Integer, db.ForeignKey('ai_stations.id'))
+
+
+class AiStation(db.Model):
+    __tablename__ = 'ai_stations'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
