@@ -31,9 +31,10 @@ FileObject = TypeVar('FileObject')
 @boars.route('/', methods=['GET', 'POST'])
 @login_required
 def index() -> str:
-    """
-    /boars/
-    登録済みの雄一覧を表示
+    """登録済みの雄一覧を表示
+
+    ・ログイン中のユーザーが所属しているAIセンター管轄の農場IDをリストに格納
+    ・管轄農場に所属している雄を全て表示
 
     Returns:
         str: html
