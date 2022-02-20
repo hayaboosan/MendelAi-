@@ -16,7 +16,7 @@ from sqlalchemy import and_
 
 
 from mendel_japan import db, ALLOWED_EXTENSIONS, UPLOAD_FOLDER
-from mendel_japan.models import Boar, Farm
+from mendel_japan.models import Boar, Farm, AiStation
 from mendel_japan.boars import exporter, forms, importer
 
 
@@ -29,7 +29,7 @@ FileObject = TypeVar('FileObject')
 
 
 @boars.route('/', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def index() -> str:
     """
     /boars/
@@ -38,13 +38,15 @@ def index() -> str:
     Returns:
         str: html
     """
-    boars: Boar = Boar.query.all()
+    farm_ids = [
+        x.id for x in AiStation.query.get(current_user.ai_station_id).farm_ids]
+    boars: Boar = Boar.query.filter(Boar.farm_id.in_(farm_ids)).all()
     return render_template(
         './boars/index.html', user=current_user, boars=boars, farms=Farm.query)
 
 
 @ boars.route('/create', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def create() -> str:
     """
     新規雄情報を作成する
@@ -66,7 +68,7 @@ def create() -> str:
 
 
 @ boars.route('/<int:id>/edit', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def edit(id: int) -> str:
     """
     既存の雄情報を編集する
@@ -120,7 +122,7 @@ def commit_boar(form: forms.BoarForm, id: int = None) -> None:
 
 
 @ boars.route('/upload', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def upload() -> str:
     """
     boarsテーブルに雄を一括登録する
@@ -172,7 +174,7 @@ def save_and_import(file: FileObject, farm_id: int) -> None:
 
 
 @ boars.route('/delete-boar', methods=['POST'])
-# @login_required
+@login_required
 def delete_boar() -> jsonify:
     """
     雄を削除する
@@ -192,7 +194,7 @@ def delete_boar() -> jsonify:
 
 
 @boars.route('/download', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def download() -> str | wrappers.Response:
     """
     雄リストダウンロードページ
@@ -283,5 +285,4 @@ def download_check_farm(
         Boar.id.in_(boar_ids), Boar.farm_id.in_(farms),))
 
     # TODO: 状態モデルの作成と雄モデルの接続
-    # TODO: AIセンターモデルの作成とデフォルト表示
     # TODO: AIセンターモデルと編集権限
