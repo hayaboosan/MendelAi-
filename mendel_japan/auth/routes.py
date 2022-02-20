@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, flash, redirect, url_for
-from ..models import User
+from ..models import User, AiStation
 from werkzeug.security import generate_password_hash, check_password_hash
 from .. import db
 from flask_login import login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField, SelectField
 from wtforms.validators import InputRequired, Email, Length, EqualTo
 
 
@@ -45,7 +45,22 @@ class SignUpForm(FlaskForm):
     confirm = PasswordField('パスワード確認', validators=[
         InputRequired('必須です'),
         EqualTo('password', message='パスワードと一致しません')])
+    ai_station_id = SelectField('AIセンター', coerce=int)
     submit = SubmitField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._set_ai_stations()
+
+    def _set_ai_stations(self) -> None:
+        """AIセンターモデルのデータを選択肢として表示させる
+
+        Args:
+            self (SignUpForm): 入力フォーム
+        """
+        ai_stations: AiStation = AiStation.query.order_by(AiStation.id).all()
+        self.ai_station_id.choices = \
+            [(ai_station.id, ai_station.name) for ai_station in ai_stations]
 
 
 class LoginForm(FlaskForm):
