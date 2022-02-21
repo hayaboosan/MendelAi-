@@ -5,6 +5,9 @@ from flask import flash
 import re
 
 
+from mendel_japan.models import Line
+
+
 def import_boar_list(file_path: str, filename: str, farm_id: int) -> None:
     """
     アップロードしたExcelファイルのフォーマットをチェック
@@ -17,13 +20,11 @@ def import_boar_list(file_path: str, filename: str, farm_id: int) -> None:
         filename (str): アップロードファイルのファイル名
     """
     df: pd.DataFrame = check_format(file_path)
-    boar_to_register: pd.DataFrame = df[
-        ~(df.tattoo.isin(already_registered().tattoo))]
-    if len(boar_to_register) > 1:
-        boar_rename = rename_to_boar(boar_to_register)
-        boar_add_farm = boar_rename.copy()
-        boar_add_farm['farm_id'] = farm_id
-        append_database(boar_add_farm)
+    df_rename = df[~(df.tattoo.isin(already_registered().tattoo))]
+    if len(df_rename) > 1:
+        boar_rename = rename_to_boar(df_rename)
+        boar_rename['farm_id'] = farm_id
+        append_database(boar_rename)
     else:
         flash(f'{filename}に未登録の雄はいませんでした。', 'error')
 
@@ -35,12 +36,9 @@ def already_registered() -> pd.DataFrame:
     Returns:
         pd.DataFrame: boarsテーブルに登録済みの雄
     """
+    columns = ['tattoo', 'name', 'line_id', 'birth_on']
     engine = create_engine(DATABASE_URI, echo=True)
-    return pd.read_sql('boars', engine, columns=columns())
-
-
-def columns() -> list:
-    return ['tattoo', 'name', 'line', 'birth_on']
+    return pd.read_sql('boars', engine, columns=columns)
 
 
 def change_columns_title() -> dict:
@@ -55,8 +53,8 @@ def change_columns_title() -> dict:
         'タトゥー': 'tattoo',
         'Name': 'name',
         '雄ID': 'name',
-        'Line': 'line',
-        '系統': 'line',
+        'Line': '系統',
+        '系統': '系統',
         'Date birth': 'birth_on',
         '生年月日': 'birth_on',
     }
@@ -74,15 +72,15 @@ def check_format(file_path: str) -> pd.DataFrame:
     Returns:
         pd.DataFrame: アップロードファイルから取り出した雄
     """
-    check: pd.DataFrame = pd.read_excel(file_path)
-    column1: str = check.columns.values[0]
-    if column1 == 'Applied filters: ':
-        df: pd.DataFrame = pd.read_excel(file_path, header=2)
-        df2 = df.rename(columns=change_columns_title())
-        return df2.query('tattoo == tattoo')[columns()]
-    elif column1 == 'タトゥー':
-        df: pd.DataFrame = pd.read_excel(file_path)
-        return df.rename(columns=change_columns_title())
+    top_cell_value: str = pd.read_excel(file_path).columns.values[0]
+    columns = ['tattoo', 'name', '系統', 'birth_on']
+    if top_cell_value == 'Applied filters: ':
+        return (pd.read_excel(file_path, header=2)
+                .rename(columns=change_columns_title())
+                .query('tattoo == tattoo')[columns])
+    elif top_cell_value == 'タトゥー':
+        return (pd.read_excel(file_path)
+                .rename(columns=change_columns_title()))
 
 
 def rename_to_boar(df: pd.DataFrame) -> pd.DataFrame:
@@ -97,14 +95,17 @@ def rename_to_boar(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: 雄IDを変更した雄
     """
-    df.loc[df['line'] == 'MMMM', 'name'] = \
+    df.loc[df['系統'] == 'MMMM', 'name'] = \
         df['tattoo'].replace({'UR': '', 'EN': ''}, regex=True)
-    df.loc[df['line'] != 'MMMM', 'name'] = df.apply(
-        lambda x: lines(x.line) + re.sub(r"\D", '', x.tattoo), axis=1)
-    return df
+
+    df.loc[df['系統'] != 'MMMM', 'name'] = df.apply(
+        lambda x: line_to_head(x.系統) + re.sub(r"\D", '', x.tattoo), axis=1)
+
+    df.loc[:, 'line_id'] = df.apply(lambda x: lines(x.系統), axis=1)
+    return df.drop('系統', axis=1)
 
 
-def lines(line: str) -> str:
+def line_to_head(line: str) -> str:
     """
     トピッグスの系統から雄IDの頭につくアルファベットを返す
 
@@ -116,6 +117,18 @@ def lines(line: str) -> str:
     """
     line_to_name: dict = {'LLLL': 'LL', 'NNNN': 'TL', 'ZZZZ': 'TW', 'MMMM': ''}
     return line_to_name[line]
+
+
+def lines(line: str) -> int:
+    """該当の系統名のidを返す
+
+    Args:
+        line (str): 系統(アルファベット4文字)
+
+    Returns:
+        int: 系統モデルのインデックス番号
+    """
+    return Line.query.filter(Line.line == line).first().id
 
 
 def append_database(df: pd.DataFrame) -> None:
