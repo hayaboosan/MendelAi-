@@ -4,7 +4,7 @@
     ・一括登録用ファイルアップロード用
     ・Excelファイルダウンロード用
     """
-from mendel_japan.models import Farm
+from mendel_japan.models import Farm, Line
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField, DateField, validators, SubmitField, FileField, RadioField,
@@ -20,19 +20,18 @@ class BoarForm(FlaskForm):
     name = StringField('雄ID', validators=[
         validators.InputRequired('必須です'),
         validators.Length(max=10, message='10文字以内で入力してください')])
-    line = StringField('系統', validators=[
-        validators.InputRequired('必須です'),
-        validators.Length(max=10, message='10文字以内で入力してください')])
     birth_on = DateField('生年月日', validators=[
         validators.Optional(strip_whitespace=True)])
     culling_on = DateField('淘汰日', validators=[
         validators.Optional(strip_whitespace=True)])
     farm_id = SelectField('農場', coerce=int)
+    line_id = SelectField('系統', coerce=int)
     submit = SubmitField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._set_farms()
+        self._set_lines()
 
     def _set_farms(self) -> None:
         """Farmモデルのデータを選択肢として表示させる
@@ -40,8 +39,18 @@ class BoarForm(FlaskForm):
         Args:
             self (BoarForm): 入力フォーム
         """
-        farms: Farm = Farm.query.order_by(asc(Farm.id)).all()
+        farms: Farm = Farm.query.order_by(Farm.id).all()
         self.farm_id.choices = [(farm.id, farm.name) for farm in farms]
+
+    def _set_lines(self) -> None:
+        """Lineモデルのデータを選択肢として表示させる
+
+        Args:
+            self (BoarForm): 入力フォーム
+        """
+        lines: Line = Line.query.order_by(Line.code).all()
+        self.line_id.choices = \
+            [(line.id, f'{line.code} ({line.name})') for line in lines]
 
 
 class BoarUpload(FlaskForm):
@@ -62,7 +71,7 @@ class BoarUpload(FlaskForm):
         Args:
             self (BoarForm): 入力フォーム
         """
-        farms: Farm = Farm.query.order_by(asc(Farm.id)).all()
+        farms: Farm = Farm.query.order_by(Farm.id).all()
         self.farm_id.choices = [(farm.id, farm.name) for farm in farms]
 
 

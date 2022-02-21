@@ -16,7 +16,7 @@ from sqlalchemy import and_
 
 
 from mendel_japan import db, ALLOWED_EXTENSIONS, UPLOAD_FOLDER
-from mendel_japan.models import Boar, Farm, AiStation
+from mendel_japan.models import Boar, Farm, AiStation, Line
 from mendel_japan.boars import exporter, forms, importer
 
 
@@ -43,7 +43,8 @@ def index() -> str:
         x.id for x in AiStation.query.get(current_user.ai_station_id).farm_ids]
     boars: Boar = Boar.query.filter(Boar.farm_id.in_(farm_ids)).all()
     return render_template(
-        './boars/index.html', user=current_user, boars=boars, farms=Farm.query)
+        './boars/index.html', user=current_user, boars=boars,
+        farms=Farm.query, lines=Line.query)
 
 
 @ boars.route('/create', methods=['GET', 'POST'])
@@ -113,7 +114,7 @@ def commit_boar(form: forms.BoarForm, id: int = None) -> None:
     boar: Boar = Boar.query.get(id) if id else Boar()
     boar.tattoo = form.tattoo.data
     boar.name = form.name.data
-    boar.line = form.line.data
+    boar.line_id = form.line_id.data
     boar.birth_on = form.birth_on.data
     boar.culling_on = form.culling_on.data
     boar.farm_id = form.farm_id.data
@@ -287,3 +288,5 @@ def download_check_farm(
 
     # TODO: 状態モデルの作成と雄モデルの接続
     # TODO: AIセンターモデルと編集権限
+    # TODO: 系統モデルを作成
+    # TODO: Excel取り込み時の系統モデルとの連動

@@ -43,7 +43,7 @@ title %}雄一覧{% endblock %} {% block content %}
             <tr id="boar-id-{{boar.id}}">
                 <td>{{farms.get(boar.farm_id).name}}</td>
                 <td>{{boar.name}}</td>
-                <td>{{boar.line}}</td>
+                <td>{{lines.get(boar.line_id).code}}</td>
                 <td>{{boar.culling_on}}</td>
                 <td>
                     <a
