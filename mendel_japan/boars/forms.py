@@ -9,7 +9,6 @@ from flask_wtf import FlaskForm
 from wtforms import (
     StringField, DateField, validators, SubmitField, FileField, RadioField,
     BooleanField, SelectField)
-from sqlalchemy import asc
 
 
 class BoarForm(FlaskForm):
