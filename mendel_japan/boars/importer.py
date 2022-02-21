@@ -1,6 +1,5 @@
 import pandas as pd
-from sqlalchemy import create_engine
-from config import DATABASE_URI
+from config import engine
 from flask import flash
 import re
 
@@ -37,7 +36,6 @@ def already_registered() -> pd.DataFrame:
         pd.DataFrame: boarsテーブルに登録済みの雄
     """
     columns = ['tattoo', 'name', 'line_id', 'birth_on']
-    engine = create_engine(DATABASE_URI, echo=True)
     return pd.read_sql('boars', engine, columns=columns)
 
 
@@ -139,6 +137,5 @@ def append_database(df: pd.DataFrame) -> None:
     Args:
         df (pd.DataFrame): [description]
     """
-    engine = create_engine(DATABASE_URI, echo=True)
     df.to_sql('boars', engine, index=False, if_exists='append')
     flash(f'{len(df)}頭追加しました。')

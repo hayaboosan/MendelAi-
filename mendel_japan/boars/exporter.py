@@ -1,28 +1,28 @@
+"""ダウンロード用のExcelファイルを作成してレスポンスとして返す"""
+
 import flask
 import flask_sqlalchemy
-
-
 import pandas as pd
 import openpyxl as xl
 from openpyxl.styles.borders import Border, Side
 from openpyxl.styles import Alignment
 import os
 from datetime import datetime
-import sqlalchemy
 
 
-from config import DATABASE_URI
-from mendel_japan.models import Farm
+from config import engine
+from mendel_japan.models import Farm, Line
 
 
 def downloadExcel(
         boars_query: flask_sqlalchemy.BaseQuery) -> flask.wrappers.Response:
-    """
-    選択した条件の雄(boars_query)をデータフレームに変換
-    カラム名を日本語に変換
-    農場名を日本語に変換
-    Excelファイルに入力
-    Excelファイルをレスポンスとして返す
+    """ダウンロード用のExcelファイルを作成してレスポンスとして返す
+
+    ・選択した条件の雄(boars_query)をデータフレームに変換
+    ・カラム名を日本語に変換
+    ・リレーションしている項目を変換
+    ・Excelファイルに出力
+    ・Excelファイルをレスポンスとして返す
 
     Args:
         boars_query (flask_sqlalchemy.BaseQuery): 選択した条件(SQL)
@@ -30,8 +30,6 @@ def downloadExcel(
     Returns:
         flask.wrappers.Response: Excelファイルのレスポンス
     """
-    engine: sqlalchemy.engine = \
-        sqlalchemy.create_engine(DATABASE_URI, echo=True)
     boars: pd.DataFrame = pd.read_sql(boars_query.statement, con=engine)
     boars_rename: pd.DataFrame = data_rename(boars)
     file_name: str = add_workbook(boars_rename)
@@ -39,7 +37,11 @@ def downloadExcel(
 
 
 def data_rename(boars: pd.DataFrame) -> pd.DataFrame:
-    """雄一覧のカラム名と農場名を日本語に変換して返す
+    """カラム名とリレーションしている項目を変換して返す
+
+    ・カラム名を日本語に変換
+    ・農場カラムの内容をFarm.idから農場名に変換
+    ・系統カラムの内容をLine.idから系統(略)に変換
 
     Args:
         boars (pd.DataFrame): 未加工の雄一覧
@@ -48,34 +50,35 @@ def data_rename(boars: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: 変換後の雄一覧
     """
     boars_columns_rename: pd.DataFrame = boars.rename(columns=rename_column())
-    boars_add_farm_name: pd.DataFrame = boars_columns_rename.copy()
-    boars_add_farm_name['農場'] = \
+    boars_columns_rename['農場'] = \
         boars_columns_rename.農場.map(lambda x: Farm.query.get(x).name)
-    return boars_add_farm_name
+    boars_columns_rename['系統'] = \
+        boars_columns_rename.系統.map(lambda x: Line.query.get(x).abbreviation)
+    return boars_columns_rename[rename_column().values()]
 
 
 def rename_column() -> dict:
-    """
-    Excelファイルのカラム名を日本語にするため
-    データフレームの時点で変換する
+    """カラム名を日本語に変換する前後を辞書型で返す
 
     Returns:
         dict: 変換前後のカラム名
     """
     return {
+        'farm_id': '農場',
         'tattoo': 'タトゥー',
         'name': '雄ID',
-        'line': '系統',
+        'line_id': '系統',
         'birth_on': '生年月日',
         'culling_on': '淘汰日',
-        'farm_id': '農場',
     }
 
 
 def add_workbook(boars: pd.DataFrame) -> str:
-    """
-    Excelファイルを作成
-    フォーマットを整えて保存しファイル名を返す
+    """Excelファイルを新規作成してファイル名を返す
+
+    ・Excelファイルを新規作成
+    ・データフレームの内容を入力
+    ・フォーマットを整えて保存しファイル名を返す
 
     Args:
         boars (pd.DataFrame): 雄一覧
@@ -97,24 +100,22 @@ def add_workbook(boars: pd.DataFrame) -> str:
 
 
 def input_worksheet(ws: xl.worksheet, boars: pd.DataFrame) -> None:
-    """
-    データフレームの内容をExcelファイルに入力
+    """データフレームの内容をExcelファイルに入力
 
     Args:
-        ws (xl.worksheet): [description]
-        boars (pd.DataFrame): [description]
+        ws (xl.worksheet): ワークシート
+        boars (pd.DataFrame): 雄一覧
     """
-    for col, title in enumerate(boars.columns.values[1:], 1):
+    for col, title in enumerate(boars.columns.values, 1):
         ws.cell(1, col).value = title
 
     for row, boar in enumerate(boars.itertuples(), 2):
-        for col, data in enumerate(boar[2:], 1):
+        for col, data in enumerate(boar[1:], 1):
             ws.cell(row, col).value = data
 
 
 def add_format(ws: xl.worksheet) -> None:
-    """
-    フォーマットの設定
+    """フォーマットの設定
 
     Args:
         ws (xl.worksheet): ワークシート
@@ -127,8 +128,7 @@ def add_format(ws: xl.worksheet) -> None:
 
 
 def change_font(ws: xl.worksheet, col: tuple, size: int) -> None:
-    """
-    フォントの変更と縮小して全体を表示設定
+    """フォントの変更と縮小して全体を表示設定
 
     Args:
         ws (xl.worksheet): ワークシート
@@ -142,8 +142,7 @@ def change_font(ws: xl.worksheet, col: tuple, size: int) -> None:
 
 
 def change_width(ws: xl.worksheet, col: tuple) -> None:
-    """
-    列幅の設定
+    """列幅の設定
 
     Args:
         ws (xl.worksheet): ワークシート
@@ -154,9 +153,9 @@ def change_width(ws: xl.worksheet, col: tuple) -> None:
 
 
 def background_color(col: tuple) -> None:
-    """
-    背景色の変更
-    1行目のみ水色
+    """背景色の変更
+
+    ・1行目のみ水色
 
     Args:
         col (xl.column): 列オブジェクト
@@ -167,8 +166,8 @@ def background_color(col: tuple) -> None:
 
 
 def fill(cell: xl.cell, color: str) -> None:
-    """
-    背景色を指定の色に変更
+    """背景色を指定の色に変更
+
     Args:
         cell (xl.cell): セルオブジェクト
         color (str): 色コード
@@ -178,8 +177,8 @@ def fill(cell: xl.cell, color: str) -> None:
 
 
 def add_border(col: tuple) -> None:
-    """
-    セルに罫線を設定する
+    """セルに罫線を設定する
+
     四方を通常の罫線で囲む
 
     Args:
@@ -194,8 +193,8 @@ def add_border(col: tuple) -> None:
 
 
 def add_response(file_name: str) -> flask.wrappers.Response:
-    """
-    レスポンスを返す
+    """レスポンスを返す
+
     中段は何の設定か良くわからない
 
     Args:
