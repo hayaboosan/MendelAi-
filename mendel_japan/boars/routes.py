@@ -306,16 +306,13 @@ def download_check_farm(
         flask_sqlalchemy.BaseQuery: 雄一覧
     """
     farms: list = []
-    if form.ggp1.data:
-        farms.append(41)
-    if form.ggp2.data:
-        farms.append(42)
-    if form.east.data:
-        farms.append(61)
+    for farm in form:
+        if 'farm' in farm.id and farm.data:
+            farms.append(Farm.query.filter(
+                Farm.abbreviation == farm.label.text).first().id)
+
     return Boar.query.filter(and_(
         Boar.id.in_(boar_ids), Boar.farm_id.in_(farms),))
 
     # TODO: 状態モデルの作成と雄モデルの接続
     # TODO: AIセンターモデルと編集権限
-    # TODO: 系統モデルを作成
-    # TODO: Excel取り込み時の系統モデルとの連動

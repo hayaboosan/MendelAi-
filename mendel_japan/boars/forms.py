@@ -90,7 +90,7 @@ class BoarDownload(FlaskForm):
     jl_line = BooleanField('L')
     jw_line = BooleanField('W')
 
-    ggp1 = BooleanField('GGP')
-    ggp2 = BooleanField('第2農場')
-    east = BooleanField('東日本')
+    ggp1_farm = BooleanField('GGP')
+    ggp2_farm = BooleanField('第2農場')
+    east_farm = BooleanField('東日本')
     submit = SubmitField()

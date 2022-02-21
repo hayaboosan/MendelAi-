@@ -43,6 +43,7 @@ class Farm(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
+    abbreviation = db.Column(db.String(50), unique=True)
     boar_ids = db.relationship('Boar', backref='farms', lazy=True)
     ai_station_id = db.Column(db.Integer, db.ForeignKey('ai_stations.id'))
 
@@ -57,6 +58,7 @@ class AiStation(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
+    abbreviation = db.Column(db.String(50), unique=True)
     farm_ids = db.relationship('Farm', backref='ai_stations', lazy=True)
     user_ids = db.relationship('User', backref='ai_stations', lazy=True)
 
