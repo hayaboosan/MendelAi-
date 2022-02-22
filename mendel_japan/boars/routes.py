@@ -16,7 +16,7 @@ from sqlalchemy import and_
 
 
 from mendel_japan import db, ALLOWED_EXTENSIONS, UPLOAD_FOLDER
-from mendel_japan.models import Boar, Farm, AiStation, Line
+from mendel_japan.models import Boar, Farm, AiStation, Line, Status
 from mendel_japan.boars import exporter, forms, importer
 
 
@@ -313,6 +313,18 @@ def download_check_farm(
 
     return Boar.query.filter(and_(
         Boar.id.in_(boar_ids), Boar.farm_id.in_(farms),))
+
+
+@ boars.route('/<int:id>', methods=['GET', 'POST'])
+@login_required
+def show(id: int) -> str:
+    boar: Boar = Boar.query.get(id)
+    statuses = Status.query.filter(Status.boar_id == id)
+    line = Line.query.filter(Line.id == boar.line_id).first()
+    farm = Farm.query.filter(Farm.id == boar.farm_id).first()
+    return render_template(
+        './boars/show.html', user=current_user, boar=boar, statuses=statuses,
+        line=line, farm=farm)
 
     # TODO: 状態モデルの作成と雄モデルの接続
     # TODO: AIセンターモデルと編集権限

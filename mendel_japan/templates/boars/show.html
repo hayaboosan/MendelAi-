@@ -1,0 +1,62 @@
+{% extends "base.html" %} {% import "bootstrap/wtf.html" as wtf %} {% block
+title %}雄詳細{% endblock %} {% block content %}
+<h1 align="center">{{boar.name}}詳細</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">タトゥー</th>
+            <th scope="col">雄ID</th>
+            <th scope="col">系統</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{boar.tattoo}}</td>
+            <td>{{boar.name}}</td>
+            <td>{{line.name}}</td>
+        </tr>
+    </tbody>
+    <thead>
+        <tr>
+            <th scope="col">農場</th>
+            <th scope="col">生年月日</th>
+            <th scope="col">淘汰日</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{farm.name}}</td>
+            <td>{{boar.birth_on}}</td>
+            <td>{{line.culling_on}}</td>
+        </tr>
+    </tbody>
+</table>
+
+<table id="datatable" class="display" style="width: 100%">
+    <thead>
+        <tr>
+            <th>設定日</th>
+            <th>状態</th>
+            <th>理由</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for status in statuses %}
+        <tr id="status-id-{{status_id}}">
+            <td>{{status.start_on}}</td>
+            <td>{{status.status}}</td>
+            <td>{{status.reason}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>設定日</th>
+            <th>状態</th>
+            <th>理由</th>
+        </tr>
+    </tfoot>
+</table>
+{% endblock %}
