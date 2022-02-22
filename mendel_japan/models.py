@@ -21,6 +21,7 @@ class Boar(db.Model):
 
     ・雄 多 : 農場 1
     ・雄 多 : 系統 1
+    ・雄 1 : 状態 多
     """
     __tablename__ = 'boars'
 
@@ -31,6 +32,7 @@ class Boar(db.Model):
     culling_on = db.Column(db.Date)
     farm_id = db.Column(db.Integer, db.ForeignKey('farms.id'))
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'))
+    status_ids = db.relationship('Status', backref='boars', lazy=True)
 
 
 class Farm(db.Model):
@@ -76,3 +78,17 @@ class Line(db.Model):
     abbreviation = db.Column(db.String(50), unique=True, nullable=False)
     code = db.Column(db.String(50), unique=True)
     boar_ids = db.relationship('Boar', backref='lines', lazy=True)
+
+
+class Status(db.Model):
+    """状態モデル
+
+    ・状態 多 : 雄 1
+    """
+    __tablename__ = 'statuses'
+
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(50), nullable=False)
+    reason = db.Column(db.String(50))
+    start_on = db.Column(db.Date)
+    boar_id = db.Column(db.Integer, db.ForeignKey('boars.id'))
