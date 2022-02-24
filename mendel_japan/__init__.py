@@ -37,7 +37,7 @@ def create_app():
     base_assets.init_app(app)
 
     from .models import User
-    migrate = Migrate(app, db)
+    migrate = Migrate(app, db)  # noqa: F841
 
     db.create_all(app=app)
 
