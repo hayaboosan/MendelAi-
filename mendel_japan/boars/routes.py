@@ -16,7 +16,7 @@ from sqlalchemy import and_
 
 
 from mendel_japan import db, ALLOWED_EXTENSIONS, UPLOAD_FOLDER
-from mendel_japan.models import Boar, Farm, AiStation, Line, Status
+from mendel_japan.models import Boar, Farm, Line
 from mendel_japan.boars import exporter, forms, importer
 
 
@@ -29,7 +29,7 @@ FileObject = TypeVar('FileObject')
 
 
 @boars.route('/')
-@login_required
+# @login_required
 def index() -> str:
     """登録済みの雄一覧を表示
 
@@ -41,12 +41,9 @@ def index() -> str:
     Returns:
         str: html
     """
-    farms = AiStation.query.get(current_user.ai_station_id).farm_ids
-    farm_ids = [x.id for x in farms]
-    boars: Boar = Boar.query.filter(Boar.farm_id.in_(farm_ids)).all()
+    boars = Boar.query.all()
     return render_template(
-        './boars/index.html', user=current_user, boars=boars,
-        farms=Farm.query, lines=Line.query)
+        './boars/index.html', user=current_user, boars=boars)
 
 
 @ boars.route('/create', methods=['GET', 'POST'])
@@ -316,15 +313,8 @@ def download_check_farm(
 
 
 @ boars.route('/<int:id>', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def show(id: int) -> str:
     boar: Boar = Boar.query.get(id)
-    statuses = Status.query.filter(Status.boar_id == id)
-    line = Line.query.filter(Line.id == boar.line_id).first()
-    farm = Farm.query.filter(Farm.id == boar.farm_id).first()
     return render_template(
-        './boars/show.html', user=current_user, boar=boar, statuses=statuses,
-        line=line, farm=farm)
-
-    # TODO: 状態モデルの作成と雄モデルの接続
-    # TODO: AIセンターモデルと編集権限
+        './boars/show.html', user=current_user, boar=boar)

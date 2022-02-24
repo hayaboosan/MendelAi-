@@ -30,48 +30,35 @@ title %}雄一覧{% endblock %} {% block content %}
 <table id="datatable" class="display" style="width: 100%">
         <thead>
             <tr>
-                <th>農場</th>
+                <th>AIセンター</th>
                 <th>雄ID</th>
                 <th>系統</th>
+                <th>状態</th>
+                <th>状態設定日</th>
                 <th>淘汰日</th>
-                <th></th>
             </tr>
         </thead>
 
         <tbody>
             {% for boar in boars %}
             <tr id="boar-id-{{boar.id}}">
-                <td>{{farms.get(boar.farm_id).name}}</td>
+                <td>{{boar.ai_station().name}}</td>
                 <td><a href="/boars/{{boar.id}}">{{boar.name}}</a></td>
-                <td>{{lines.get(boar.line_id).code}}</td>
+                <td>{{boar.line().code}}</td>
+                <td>{{boar.latest_status().status}}</td>
+                <td>{{boar.latest_status().start_on}}</td>
                 <td>{{boar.culling_on}}</td>
-                <td>
-                    <a
-                        class="btn btn-secondary"
-                        href="/boars/{{boar.id}}/edit"
-                        role="button"
-                        aria-expanded="false"
-                        aria-controls="multiCollapseExample1"
-                        >編集</a
-                    >
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        onClick="deleteBoar({{boar.id}})"
-                    >
-                        削除
-                    </button>
-                </td>
             </tr>
             {% endfor %}
         </tbody>
         <tfoot>
             <tr>
-                <th>農場</th>
+                <th>AIセンター</th>
                 <th>雄ID</th>
                 <th>系統</th>
+                <th>状態</th>
+                <th>状態設定日</th>
                 <th>淘汰日</th>
-                <th></th>
             </tr>
         </tfoot>
     </table>

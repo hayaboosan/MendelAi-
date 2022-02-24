@@ -1,5 +1,6 @@
-from . import db
+from . import db, session
 from flask_login import UserMixin
+from sqlalchemy import and_, func, desc
 
 
 class User(db.Model, UserMixin):
@@ -33,6 +34,34 @@ class Boar(db.Model):
     farm_id = db.Column(db.Integer, db.ForeignKey('farms.id'))
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'))
     status_ids = db.relationship('Status', backref='boars', lazy=True)
+
+    def status_ids_list(self):
+        return [x.id for x in self.status_ids]
+
+    def all_statuses(self):
+        return session.query(Status) \
+            .filter(Status.id.in_(self.status_ids_list())) \
+            .order_by(desc(Status.start_on)).all()
+
+    def latest_status(self):
+        latest_status_date = session.query(func.max(Status.start_on)) \
+            .filter(Status.id.in_(self.status_ids_list())).first()[0]
+
+        return session.query(Status) \
+            .filter(and_(
+                Status.id.in_(self.status_ids_list()),
+                Status.start_on == latest_status_date
+            )).first()
+
+    def ai_station(self):
+        return AiStation.query.get(
+            Farm.query.get(self.farm_id).ai_station_id)
+
+    def line(self):
+        return Line.query.get(self.line_id)
+
+    def farm(self):
+        return Farm.query.get(self.farm_id)
 
 
 class Farm(db.Model):

@@ -4,8 +4,13 @@ import os
 from flask_login import LoginManager
 from flask_bootstraps import Bootstrap
 from flask_migrate import Migrate
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from config import engine
 
 db = SQLAlchemy()
+session = scoped_session(sessionmaker(
+    autocommit=False, autoflush=False, bind=engine))
 
 DB_NAME = 'database.db'
 UPLOAD_FOLDER = 'mendel_japan/static/tmp/'

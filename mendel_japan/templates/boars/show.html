@@ -1,9 +1,9 @@
 {% extends "base.html" %} {% import "bootstrap/wtf.html" as wtf %} {% block
 title %}雄詳細{% endblock %} {% block content %}
-<h1 align="center">{{boar.name}}詳細</h1>
+<h3>{{boar.name}}詳細</h3>
 
-<table class="table table-bordered">
-    <thead>
+<table class="table table-hover table-bordered border-dark">
+    <thead class="table-light table-bordered border-dark">
         <tr>
             <th scope="col">タトゥー</th>
             <th scope="col">雄ID</th>
@@ -14,36 +14,51 @@ title %}雄詳細{% endblock %} {% block content %}
         <tr>
             <td>{{boar.tattoo}}</td>
             <td>{{boar.name}}</td>
-            <td>{{line.name}}</td>
+            <td>{{boar.line().name}}</td>
         </tr>
     </tbody>
-    <thead>
+    <thead class="table-light table-bordered border-dark">
         <tr>
+            <th scope="col">AIセンター</th>
             <th scope="col">農場</th>
-            <th scope="col">生年月日</th>
-            <th scope="col">淘汰日</th>
+            <th scope="col"></th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td>{{farm.name}}</td>
+            <td>{{boar.ai_station().name}}</td>
+            <td>{{boar.farm().name}}</td>
+            <td></td>
+        </tr>
+    </tbody>
+    <thead class="table-light table-bordered border-dark">
+        <tr>
+            <th scope="col">生年月日</th>
+            <th scope="col">淘汰日</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
             <td>{{boar.birth_on}}</td>
-            <td>{{line.culling_on}}</td>
+            <td>{{boar.culling_on}}</td>
+            <td></td>
         </tr>
     </tbody>
 </table>
 
-<table id="datatable" class="display" style="width: 100%">
-    <thead>
+<h3>{{boar.name}}状態</h3>
+<table class="table table-hover table-bordered border-dark">
+    <thead class="table-light table-bordered border-dark">
         <tr>
-            <th>設定日</th>
-            <th>状態</th>
-            <th>理由</th>
+            <th scope="col">設定日</th>
+            <th scope="col">状態</th>
+            <th scope="col">理由</th>
         </tr>
     </thead>
 
     <tbody>
-        {% for status in statuses %}
+        {% for status in boar.all_statuses() %}
         <tr id="status-id-{{status_id}}">
             <td>{{status.start_on}}</td>
             <td>{{status.status}}</td>
@@ -51,12 +66,5 @@ title %}雄詳細{% endblock %} {% block content %}
         </tr>
         {% endfor %}
     </tbody>
-    <tfoot>
-        <tr>
-            <th>設定日</th>
-            <th>状態</th>
-            <th>理由</th>
-        </tr>
-    </tfoot>
 </table>
 {% endblock %}
