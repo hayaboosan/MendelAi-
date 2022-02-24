@@ -54,15 +54,29 @@ title %}雄詳細{% endblock %} {% block content %}
             <th scope="col">設定日</th>
             <th scope="col">状態</th>
             <th scope="col">理由</th>
+            <th scope="col"></th>
         </tr>
     </thead>
 
     <tbody>
+        <tr>
+            <form class="form" method="post">
+                {{ form.hidden_tag()}}
+                <td>{{ form.start_on(class="form-control") }}</td>
+                <td>{{ form.status(class="form-control") }}</td>
+                <td>{{ form.reason(class="form-control") }}</td>
+                <td>
+                    {{ wtf.form_field(form.submit, value='登録',
+                    button_map={'submit': 'primary'}) }}
+                </td>
+            </form>
+        </tr>
         {% for status in boar.all_statuses() %}
         <tr id="status-id-{{status_id}}">
             <td>{{status.start_on}}</td>
             <td>{{status.status}}</td>
             <td>{{status.reason}}</td>
+            <td></td>
         </tr>
         {% endfor %}
     </tbody>

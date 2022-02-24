@@ -4,6 +4,7 @@
     ・一括登録用ファイルアップロード用
     ・Excelファイルダウンロード用
     """
+from flask import Flask
 from mendel_japan.models import Farm, Line
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -93,4 +94,16 @@ class BoarDownload(FlaskForm):
     ggp1_farm = BooleanField('GGP')
     ggp2_farm = BooleanField('第2農場')
     east_farm = BooleanField('東日本')
+    submit = SubmitField()
+
+
+class StatusForm(FlaskForm):
+    """状態登録用クラス"""
+    start_on = DateField(
+        '日付', validators=[validators.InputRequired('必須です')])
+    status = SelectField('状態', choices=[
+        ('生産可', '生産可'), ('生産外', '生産外'), ('注意', '注意')
+    ])
+    reason = StringField('理由', validators=[
+        validators.Length(max=10, message='10文字以内で入力してください')])
     submit = SubmitField()

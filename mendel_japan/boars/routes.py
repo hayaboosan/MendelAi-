@@ -16,7 +16,7 @@ from sqlalchemy import and_
 
 
 from mendel_japan import db, ALLOWED_EXTENSIONS, UPLOAD_FOLDER
-from mendel_japan.models import Boar, Farm, Line
+from mendel_japan.models import Boar, Farm, Line, Status
 from mendel_japan.boars import exporter, forms, importer
 
 
@@ -316,5 +316,17 @@ def download_check_farm(
 # @login_required
 def show(id: int) -> str:
     boar: Boar = Boar.query.get(id)
-    return render_template(
-        './boars/show.html', user=current_user, boar=boar)
+    form: forms.StatusForm = forms.StatusForm()
+    if form.validate_on_submit():
+        status = Status()
+        status.boar_id = boar.id
+        status.status = form.status.data
+        status.reason = form.reason.data
+        status.start_on = form.start_on.data
+        db.session.add(status)
+        db.session.commit()
+        flash('状態を登録しました', category='success')
+        return redirect(url_for('boars.show', id=boar.id))
+    else:
+        return render_template(
+            './boars/show.html', user=current_user, boar=boar, form=form)
