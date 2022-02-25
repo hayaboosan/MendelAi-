@@ -41,7 +41,7 @@ class Boar(db.Model):
     def all_statuses(self):
         return session.query(Status) \
             .filter(Status.id.in_(self.status_ids_list())) \
-            .order_by(desc(Status.start_on)).all()
+            .order_by(desc(Status.start_on)).limit(5).all()
 
     def latest_status(self):
         latest_status_date = session.query(func.max(Status.start_on)) \
