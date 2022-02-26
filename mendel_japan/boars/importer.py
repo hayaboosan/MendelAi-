@@ -21,7 +21,8 @@ def import_boar_list(file_path: str, filename: str, farm_id: int) -> None:
     df: pd.DataFrame = check_format(file_path)
     df_rename = df[~(df.tattoo.isin(already_registered().tattoo))]
     if len(df_rename) > 1:
-        boar_rename = rename_to_boar(df_rename)
+        topigs_only = add_topigs_filter(df_rename)
+        boar_rename = rename_to_boar(topigs_only)
         boar_rename['farm_id'] = farm_id
         append_database(boar_rename)
     else:
@@ -55,6 +56,7 @@ def change_columns_title() -> dict:
         '系統': '系統',
         'Date birth': 'birth_on',
         '生年月日': 'birth_on',
+        'Date Mortality': 'culling_on'
     }
 
 
@@ -71,14 +73,17 @@ def check_format(file_path: str) -> pd.DataFrame:
         pd.DataFrame: アップロードファイルから取り出した雄
     """
     top_cell_value: str = pd.read_excel(file_path).columns.values[0]
-    columns = ['tattoo', 'name', '系統', 'birth_on']
-    if top_cell_value == 'Applied filters: ':
-        return (pd.read_excel(file_path, header=2)
-                .rename(columns=change_columns_title())
-                .query('tattoo == tattoo')[columns])
+    print('**********************')
+    print(top_cell_value)
+    columns = ['tattoo', 'name', '系統', 'birth_on', 'culling_on']
+    if 'Applied filters' in top_cell_value:
+        return pd.read_excel(file_path, header=2) \
+            .rename(columns=change_columns_title()) \
+            .query('tattoo == tattoo')[columns]
+
     elif top_cell_value == 'タトゥー':
-        return (pd.read_excel(file_path)
-                .rename(columns=change_columns_title()))
+        return pd.read_excel(file_path) \
+            .rename(columns=change_columns_title())
 
 
 def rename_to_boar(df: pd.DataFrame) -> pd.DataFrame:
@@ -139,3 +144,8 @@ def append_database(df: pd.DataFrame) -> None:
     """
     df.to_sql('boars', engine, index=False, if_exists='append')
     flash(f'{len(df)}頭追加しました。')
+
+
+def add_topigs_filter(df):
+    topigs_lines = ['LLLL', 'NNNN', 'ZZZZ']
+    return df[df['系統'].isin(topigs_lines)]
