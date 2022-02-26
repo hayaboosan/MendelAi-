@@ -2,4 +2,9 @@ pandas
 openpyxl
 Flask-Assets
 Flask-Migrate
+flask-login
 python-dotenv
+flask-bootstrap
+psycopg2
+Flask-WTF
+wtforms[email]
