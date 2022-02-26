@@ -56,7 +56,8 @@ def change_columns_title() -> dict:
         '系統': '系統',
         'Date birth': 'birth_on',
         '生年月日': 'birth_on',
-        'Date Mortality': 'culling_on'
+        'Date Mortality': 'culling_on',
+        '淘汰日': 'culling_on'
     }
 
 
