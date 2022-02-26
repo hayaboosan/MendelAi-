@@ -1,16 +1,3 @@
-function deleteBoar(boarId) {
-    if (window.confirm('雄情報を削除して良いですか？')) {
-        fetch('/boars/delete-boar', {
-            method: 'POST',
-            body: JSON.stringify({ boarId: boarId }),
-        }).then((_res) => {
-            var element = document.getElementById('datatable');
-            var index = document.getElementById('boar-id-' + boarId).rowIndex;
-            element.deleteRow(index);
-            alert('雄情報を削除しました。');
-        });
-    }
-}
 jQuery(function ($) {
     // デフォルトの設定を変更
     $.extend($.fn.dataTable.defaults, {
