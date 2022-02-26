@@ -151,6 +151,7 @@ def commit_user(form, id=None):
     user.name = form.name.data
     user.email = form.email.data
     user.password = generate_password_hash(form.password.data, method='sha256')
+    user.ai_station_id = form.ai_station_id.data
     if id is None:
         db.session.add(user)
     db.session.commit()
