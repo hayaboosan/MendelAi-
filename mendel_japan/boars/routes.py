@@ -29,7 +29,7 @@ FileObject = TypeVar('FileObject')
 
 
 @boars.route('/')
-# @login_required
+@login_required
 def index() -> str:
     """登録済みの雄一覧を表示
 
@@ -47,7 +47,7 @@ def index() -> str:
 
 
 @boars.route('/create', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def create() -> str:
     """新規雄情報を作成
 
@@ -73,7 +73,7 @@ def create() -> str:
 
 
 @boars.route('/<int:id>/edit', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def edit(id: int) -> str:
     """既存の雄情報を編集する
 
@@ -135,7 +135,7 @@ def commit_boar(form: forms.BoarForm, id: int = None) -> None:
 
 
 @boars.route('/upload', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def upload() -> str:
     """Excelファイルをアップロードして雄モデルを一括登録
 
@@ -197,7 +197,7 @@ def save_and_import(file: FileObject, farm_id: int) -> None:
 
 
 @boars.route('/delete-boar', methods=['POST'])
-# @login_required
+@login_required
 def delete_boar() -> jsonify:
     """雄モデルを削除する
 
@@ -217,7 +217,7 @@ def delete_boar() -> jsonify:
 
 
 @boars.route('/download', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def download() -> str | wrappers.Response:
     """雄一覧のExcelファイルをダウンロード
 
@@ -313,7 +313,7 @@ def download_check_farm(
 
 
 @boars.route('/<int:id>', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def show(id: int) -> str:
     boar: Boar = Boar.query.get(id)
     form: forms.StatusForm = forms.StatusForm()
@@ -333,7 +333,7 @@ def show(id: int) -> str:
 
 
 @boars.route('/status/<int:id>/edit', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def status_edit(id: int) -> str:
     status: Status = Status.query.get(id)
     form: forms.StatusForm = forms.StatusForm(obj=status)
@@ -352,6 +352,7 @@ def status_edit(id: int) -> str:
 
 
 @boars.route('/status/<int:id>/delete')
+@login_required
 def status_delete(id: int):
     status = Status.query.get(id)
     db.session.delete(status)
