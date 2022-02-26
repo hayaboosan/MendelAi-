@@ -1,7 +1,6 @@
 from __future__ import annotations
 from flask import (
-    Blueprint, render_template, flash, redirect, url_for, request, jsonify,
-    wrappers)
+    Blueprint, render_template, flash, redirect, url_for, request, wrappers)
 from flask import current_app as app
 from flask_assets import Bundle, Environment
 from flask_login import login_required, current_user
@@ -11,7 +10,6 @@ import flask_sqlalchemy
 import os
 from typing import TypeVar
 from werkzeug.utils import secure_filename
-import json
 from sqlalchemy import and_
 
 
@@ -41,7 +39,7 @@ def index() -> str:
     Returns:
         str: html
     """
-    boars = Boar.query.all()
+    boars = Boar.query.filter(Boar.culling_on.is_(None)).all()
     return render_template(
         './boars/index.html', user=current_user, boars=boars)
 
