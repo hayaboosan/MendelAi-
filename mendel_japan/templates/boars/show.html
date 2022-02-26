@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% import "bootstrap/wtf.html" as wtf %} {% block
 title %}雄詳細{% endblock %} {% block content %}
-<h3>{{boar.name}}詳細</h3>
+<h3 class="mt-5">{{boar.name}}詳細</h3>
 
 <table class="table table-hover table-bordered border-dark">
     <thead class="table-light table-bordered border-dark">
@@ -46,8 +46,16 @@ title %}雄詳細{% endblock %} {% block content %}
         </tr>
     </tbody>
 </table>
+<a
+    class="btn btn-secondary float-end"
+    href="/boars/{{boar.id}}/edit"
+    role="button"
+    aria-expanded="false"
+    aria-controls="multiCollapseExample1"
+    >雄情報編集</a
+>
 
-<h3>{{boar.name}}状態</h3>
+<h3 class="mt-5">{{boar.name}}状態</h3>
 <table class="table table-hover table-bordered border-dark">
     <thead class="table-light table-bordered border-dark">
         <tr>
@@ -72,11 +80,20 @@ title %}雄詳細{% endblock %} {% block content %}
             </form>
         </tr>
         {% for status in boar.all_statuses() %}
-        <tr id="status-id-{{status_id}}">
+        <tr id="status-id-{{status.id}}">
             <td>{{status.start_on}}</td>
             <td>{{status.status}}</td>
             <td>{{status.reason}}</td>
-            <td></td>
+            <td>
+                <a
+                    class="btn btn-secondary"
+                    href="/boars/status/{{status.id}}/edit"
+                    role="button"
+                    aria-expanded="false"
+                    aria-controls="multiCollapseExample1"
+                    >編集</a
+                >
+            </td>
         </tr>
         {% endfor %}
     </tbody>

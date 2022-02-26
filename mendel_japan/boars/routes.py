@@ -46,8 +46,8 @@ def index() -> str:
         './boars/index.html', user=current_user, boars=boars)
 
 
-@ boars.route('/create', methods=['GET', 'POST'])
-@login_required
+@boars.route('/create', methods=['GET', 'POST'])
+# @login_required
 def create() -> str:
     """新規雄情報を作成
 
@@ -72,8 +72,8 @@ def create() -> str:
     return render_template('./boars/create.html', user=current_user, form=form)
 
 
-@ boars.route('/<int:id>/edit', methods=['GET', 'POST'])
-@login_required
+@boars.route('/<int:id>/edit', methods=['GET', 'POST'])
+# @login_required
 def edit(id: int) -> str:
     """既存の雄情報を編集する
 
@@ -134,8 +134,8 @@ def commit_boar(form: forms.BoarForm, id: int = None) -> None:
     db.session.commit()
 
 
-@ boars.route('/upload', methods=['GET', 'POST'])
-@login_required
+@boars.route('/upload', methods=['GET', 'POST'])
+# @login_required
 def upload() -> str:
     """Excelファイルをアップロードして雄モデルを一括登録
 
@@ -196,8 +196,8 @@ def save_and_import(file: FileObject, farm_id: int) -> None:
     importer.import_boar_list(file_path, filename, farm_id)
 
 
-@ boars.route('/delete-boar', methods=['POST'])
-@login_required
+@boars.route('/delete-boar', methods=['POST'])
+# @login_required
 def delete_boar() -> jsonify:
     """雄モデルを削除する
 
@@ -217,7 +217,7 @@ def delete_boar() -> jsonify:
 
 
 @boars.route('/download', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def download() -> str | wrappers.Response:
     """雄一覧のExcelファイルをダウンロード
 
@@ -312,7 +312,7 @@ def download_check_farm(
         Boar.id.in_(boar_ids), Boar.farm_id.in_(farms),))
 
 
-@ boars.route('/<int:id>', methods=['GET', 'POST'])
+@boars.route('/<int:id>', methods=['GET', 'POST'])
 # @login_required
 def show(id: int) -> str:
     boar: Boar = Boar.query.get(id)
@@ -330,3 +330,31 @@ def show(id: int) -> str:
     else:
         return render_template(
             './boars/show.html', user=current_user, boar=boar, form=form)
+
+
+@boars.route('/status/<int:id>/edit', methods=['GET', 'POST'])
+# @login_required
+def status_edit(id: int) -> str:
+    status: Status = Status.query.get(id)
+    form: forms.StatusForm = forms.StatusForm(obj=status)
+    if form.validate_on_submit():
+        status = Status.query.get(id)
+        status.status = form.status.data
+        status.reason = form.reason.data
+        status.start_on = form.start_on.data
+        db.session.commit()
+        flash('状態を更新しました', category='success')
+        return redirect(url_for('boars.show', id=status.boar_id))
+    else:
+        return render_template(
+            './boars/status_edit.html', user=current_user, form=form,
+            status=status)
+
+
+@boars.route('/status/<int:id>/delete')
+def status_delete(id: int):
+    status = Status.query.get(id)
+    db.session.delete(status)
+    db.session.commit()
+    flash('状態を削除しました', category='error')
+    return redirect(url_for('boars.show', id=status.boar_id))

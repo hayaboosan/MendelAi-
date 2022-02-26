@@ -1,0 +1,35 @@
+{% extends "base.html" %} {% import "bootstrap/wtf.html" as wtf %} {% block
+title %}状態の編集{% endblock %} {% block content %}
+<div class="card mx-auto mt-5" style="width: 30rem">
+    <div class="card-body">
+        <h4 class="card-title mt-4 text-center">状態の編集</h4>
+        <form class="form" method="post">
+            {{ form.hidden_tag()}}
+            <div class="mt-4">{{ wtf.form_field(form.start_on) }}</div>
+            <div class="mt-4">{{ wtf.form_field(form.status) }}</div>
+            <div class="mt-4">{{ wtf.form_field(form.reason) }}</div>
+            <div class="float-start mt-4">
+                <a
+                    class="btn btn-danger"
+                    href="/boars/status/{{status.id}}/delete"
+                    role="button"
+                    aria-expanded="false"
+                    aria-controls="multiCollapseExample1"
+                    >削除</a
+                >
+            </div>
+            <div class="float-end mt-4">
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    onclick="history.back()"
+                >
+                    キャンセル
+                </button>
+                {{wtf.form_field(form.submit, value='更新',
+                button_map={'submit': 'primary'}) }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

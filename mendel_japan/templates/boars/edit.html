@@ -12,6 +12,13 @@ title %}雄情報編集{% endblock %} {% block content %}
             <div class="mt-4">{{ wtf.form_field(form.culling_on) }}</div>
             <div class="mt-4">{{ wtf.form_field(form.farm_id) }}</div>
             <div class="float-end mt-4">
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    onclick="history.back()"
+                >
+                    キャンセル
+                </button>
                 {{wtf.form_field(form.submit, value='更新',
                 button_map={'submit': 'primary'}) }}
             </div>
