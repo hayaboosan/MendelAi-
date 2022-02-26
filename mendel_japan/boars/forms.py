@@ -4,7 +4,6 @@
     ・一括登録用ファイルアップロード用
     ・Excelファイルダウンロード用
     """
-from flask import Flask
 from mendel_japan.models import Farm, Line
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -105,5 +104,5 @@ class StatusForm(FlaskForm):
         ('生産可', '生産可'), ('生産外', '生産外'), ('注意', '注意')
     ])
     reason = StringField('理由', validators=[
-        validators.Length(max=10, message='10文字以内で入力してください')])
+        validators.Length(max=20, message='20文字以内で入力してください')])
     submit = SubmitField()
