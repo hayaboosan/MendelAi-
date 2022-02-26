@@ -8,3 +8,4 @@ flask-bootstrap
 psycopg2
 Flask-WTF
 wtforms[email]
+gunicorn
