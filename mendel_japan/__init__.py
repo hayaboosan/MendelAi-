@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
 from flask_login import LoginManager
-from flask_bootstraps import Bootstrap
+from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
 from sqlalchemy.orm import scoped_session, sessionmaker
 
