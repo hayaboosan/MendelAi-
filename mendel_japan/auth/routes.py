@@ -12,7 +12,7 @@ auth = Blueprint('auth', __name__,)
 
 
 @auth.route('/')
-@login_required
+# @login_required
 def index() -> str:
     """
     トップページを返す
@@ -107,7 +107,7 @@ def login() -> str:
 
 
 @auth.route('/logout')
-@login_required
+# @login_required
 def logout():
     logout_user()
     flash('ログアウトしました', category='success')
@@ -131,7 +131,7 @@ def sign_up():
 
 
 @auth.route('/<int:id>/edit', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def edit(id):
     user = User.query.get(id)
     form = SignUpForm(obj=user)
