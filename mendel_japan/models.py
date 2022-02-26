@@ -33,7 +33,8 @@ class Boar(db.Model):
     culling_on = db.Column(db.Date)
     farm_id = db.Column(db.Integer, db.ForeignKey('farms.id'))
     line_id = db.Column(db.Integer, db.ForeignKey('lines.id'))
-    status_ids = db.relationship('Status', backref='boars', lazy=True)
+    status_ids = db.relationship(
+        'Status', backref='boars', lazy=True, cascade='delete')
 
     def status_ids_list(self):
         return [x.id for x in self.status_ids]
