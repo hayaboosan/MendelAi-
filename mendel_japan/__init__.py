@@ -24,7 +24,6 @@ def create_app():
 
     from config import DATABASE_URI
 
-    app.debug = True
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
