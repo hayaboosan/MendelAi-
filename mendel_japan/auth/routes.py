@@ -20,7 +20,7 @@ def index() -> str:
     Returns:
         str: HTML
     """
-    return render_template('index.html', user=current_user)
+    return redirect(url_for('boars.index'))
 
 
 class SignUpForm(FlaskForm):
