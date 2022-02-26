@@ -11,7 +11,9 @@
             </div>
             <div class="mt-4">{{ wtf.form_field(form.password) }}</div>
             <div class="mt-4">{{ wtf.form_field(form.confirm) }}</div>
+            {#
             <div class="mt-4">{{ wtf.form_field(form.ai_station_id) }}</div>
+            #}
             <div class="float-end mt-4">
                 {{wtf.form_field(form.submit, value='更新',
                 button_map={'submit': 'primary'}) }}

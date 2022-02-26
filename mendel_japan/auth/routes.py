@@ -45,22 +45,22 @@ class SignUpForm(FlaskForm):
     confirm = PasswordField('パスワード確認', validators=[
         InputRequired('必須です'),
         EqualTo('password', message='パスワードと一致しません')])
-    ai_station_id = SelectField('AIセンター', coerce=int)
+    # ai_station_id = SelectField('AIセンター', coerce=int)
     submit = SubmitField()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._set_ai_stations()
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self._set_ai_stations()
 
-    def _set_ai_stations(self) -> None:
-        """AIセンターモデルのデータを選択肢として表示させる
+    # def _set_ai_stations(self) -> None:
+    #     """AIセンターモデルのデータを選択肢として表示させる
 
-        Args:
-            self (SignUpForm): 入力フォーム
-        """
-        ai_stations: AiStation = AiStation.query.order_by(AiStation.id).all()
-        self.ai_station_id.choices = \
-            [(ai_station.id, ai_station.name) for ai_station in ai_stations]
+    #     Args:
+    #         self (SignUpForm): 入力フォーム
+    #     """
+    #     ai_stations: AiStation = AiStation.query.order_by(AiStation.id).all()
+    #     self.ai_station_id.choices = \
+    #         [(ai_station.id, ai_station.name) for ai_station in ai_stations]
 
 
 class LoginForm(FlaskForm):
@@ -151,7 +151,7 @@ def commit_user(form, id=None):
     user.name = form.name.data
     user.email = form.email.data
     user.password = generate_password_hash(form.password.data, method='sha256')
-    user.ai_station_id = form.ai_station_id.data
+    # user.ai_station_id = form.ai_station_id.data
     if id is None:
         db.session.add(user)
     db.session.commit()
