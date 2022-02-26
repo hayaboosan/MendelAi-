@@ -102,14 +102,14 @@ def edit(id: int) -> str:
         if registered_boar is boar or registered_boar is None:
             commit_boar(form, id)
             flash('雄情報を更新しました', category='success')
-            return redirect(url_for('boars.index'))
+            return redirect(url_for('boars.show', id=boar.id))
         else:
             flash('そのタトゥーは登録済みです', category='error')
             return render_template(
                 './boars/edit.html', user=current_user, form=form)
     else:
         return render_template(
-            './boars/edit.html', user=current_user, form=form)
+            './boars/edit.html', user=current_user, form=form, boar=boar)
 
 
 def commit_boar(form: forms.BoarForm, id: int = None) -> None:
@@ -196,24 +196,14 @@ def save_and_import(file: FileObject, farm_id: int) -> None:
     importer.import_boar_list(file_path, filename, farm_id)
 
 
-@boars.route('/delete-boar', methods=['POST'])
+@boars.route('/<int:id>/delete', methods=['POST'])
 @login_required
-def delete_boar() -> jsonify:
-    """雄モデルを削除する
-
-    ・boars.jsからデータを取得
-    ・抽出した雄モデルIDの雄を削除
-    ・削除処理完了後boars.jsにて表示中の一覧から削除
-
-    Returns:
-        jsonify: 空のJSON
-    """
-    data: dict = json.loads(request.data)
-    boar: Boar = Boar.query.get(data['boarId'])
-    if boar:
-        db.session.delete(boar)
-        db.session.commit()
-    return jsonify({})
+def delete(id: int):
+    boar = Boar.query.get(id)
+    db.session.delete(boar)
+    db.session.commit()
+    flash('雄情報を削除しました', category='error')
+    return redirect(url_for('boars.index'))
 
 
 @boars.route('/download', methods=['GET', 'POST'])
